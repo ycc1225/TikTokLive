@@ -90,14 +90,14 @@
             app:layout_constraintBottom_toTopOf="@+id/ll_input_bar"
             app:layout_constraintHeight_percent="0.35"
             app:layout_constraintStart_toStartOf="parent" />
-        <!--发送按钮-->
+        <!--发送区-->
         <LinearLayout
             android:id="@+id/ll_input_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="10dp"
-            android:background="#66000000"
+            android:background="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <EditText

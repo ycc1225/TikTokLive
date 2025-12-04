@@ -1,13 +1,17 @@
 package com.example.tiktoklive.ui.adapter
 
+import android.graphics.Color
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.tiktoklive.R
 import com.example.tiktoklive.data.model.Comment
 
@@ -40,6 +44,7 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
     class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvContent: TextView = itemView.findViewById(R.id.tv_chat_content)
+        private val ivAvatar: ImageView = itemView.findViewById(R.id.iv_chat_avatar)
 
         fun bind(comment: Comment) {
             val name = comment.userName
@@ -48,12 +53,19 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
             val spannable = SpannableString(fullText)
             spannable.setSpan(
-                ForegroundColorSpan(android.R.color.black),
+                ForegroundColorSpan(Color.parseColor("#FFD700")),
                 0,
                 name.length + 1,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
             tvContent.text = spannable
+
+            Glide.with(itemView.context)
+                .load(comment.avatarUrl)
+                .transform(CircleCrop())
+                .placeholder(R.color.uiBackground)
+                .error(R.color.uiBackground)
+                .into(ivAvatar)
         }
     }
 }
