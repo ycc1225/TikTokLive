@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tiktoklive.data.model.Comment
 import com.example.tiktoklive.data.model.Host
+import com.example.tiktoklive.data.repository.LiveRepository
 import com.example.tiktoklive.data.service.LiveApiService
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -15,6 +16,7 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
 class LiveRoomViewModel : ViewModel() {
+    private val repository = LiveRepository()
 
     // 主播信息
     private val _hostInfo = MutableLiveData<Host>()
@@ -39,7 +41,7 @@ class LiveRoomViewModel : ViewModel() {
     fun fetchHostInfo(hostId: String) {
         viewModelScope.launch {
             try {
-                val host = LiveApiService.api.getHostInfo(hostId)
+                val host = repository.getHostInfo(hostId)
                 _hostInfo.value = host
             } catch (e: Exception) {
                 Log.e("LiveRoomVM", "Error fetching host info", e)
@@ -51,7 +53,7 @@ class LiveRoomViewModel : ViewModel() {
     fun fetchComments() {
         viewModelScope.launch {
             try {
-                val list = LiveApiService.api.getComments()
+                val list = repository.getComments()
                 _comments.value = list
             } catch (e: Exception) {
                 Log.e("LiveRoomVM", "Get comments failed: ${e.message}")
@@ -63,7 +65,7 @@ class LiveRoomViewModel : ViewModel() {
         if (content.isBlank()) return
         viewModelScope.launch {
             try {
-                val newComment = LiveApiService.api.sendComment(content)
+                val newComment = repository.sendComment(content)
                 val currentList = _comments.value.orEmpty().toMutableList()
                 currentList.add(newComment)
                 _comments.value = currentList
@@ -75,31 +77,24 @@ class LiveRoomViewModel : ViewModel() {
     }
 
     fun startWebSocket() {
-        val request = okhttp3.Request.Builder().url("wss://echo.websocket.org").build()
-        webSocket = client.newWebSocket(request, object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                // 连接成功，开始模拟心跳
-                viewModelScope.launch {
-                    // 模拟：每隔2秒发一次消息，制造“有人进场”的效果
-                    while (true) {
-                        kotlinx.coroutines.delay(2000)
-                        webSocket.send("heartbeat")
-                    }
-                }
+        repository.startWebSocket(object : LiveRepository.WebSocketCallback{
+            override fun onConnected() {
+                Log.d("LiveRoomVM","连接成功")
             }
 
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                // 收到消息，人数+1
+            override fun onMessageReceived(text: String) {
                 currentCount++
                 _onlineCount.postValue(currentCount)
             }
 
-            // ... onFailure 等其他回调可按需实现 ...
+            override fun onFailure(t: Throwable) {
+                Log.e("LiveRoomVM","失败",t)
+            }
         })
     }
 
     override fun onCleared() {
         super.onCleared()
-        webSocket?.close(1000,"Closed")
+        repository.closeWebSocket()
     }
 }
