@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
+import androidx.core.animation.addListener
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -36,8 +37,12 @@ class LiveRoomActivity : AppCompatActivity() {
     private var componentManager: LiveComponentManager? =null
     private var isUILoaded = false
 
+    private var startTime:Long = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        startTime = System.currentTimeMillis()
+        Log.d("PerformanceTest","T1 - $startTime")
         setContentView(R.layout.activity_live_room)
         // 初始化view
         playerView = findViewById(R.id.player_view)
@@ -89,6 +94,10 @@ class LiveRoomActivity : AppCompatActivity() {
                 addListener(
                     object : Player.Listener{
                         override fun onRenderedFirstFrame() {
+                            val videoTime = System.currentTimeMillis()
+                            val duration = videoTime - startTime
+                            Log.d("PerformanceTest", "T2 - Video First Frame Rendered: $videoTime")
+                            Log.d("PerformanceTest", "Cost(Activity Start -> Video): ${duration}ms")
                             if (!isUILoaded){
                                 loadInteractionLayerAsync()
                             }
@@ -114,8 +123,14 @@ class LiveRoomActivity : AppCompatActivity() {
             componentManager?.register(UserInfoComponent())
             componentManager?.register(ChatComponent())
             componentManager?.register(InputComponent())
+            val uiTime = System.currentTimeMillis()
+            Log.d("PerformanceTest", "T3 - UI Inflated: $uiTime")
+            Log.d("PerformanceTest", "Cost(Video -> UI): ${uiTime - startTime}ms")
             ObjectAnimator.ofFloat(view,"alpha",0f,1f).apply {
                 duration = 500
+                addListener(onEnd = {
+                    Log.d("PerformanceTest", "T4 - UI Animation Ended (Fully Visible): ${System.currentTimeMillis()}")
+                })
                 start()
             }
         }
