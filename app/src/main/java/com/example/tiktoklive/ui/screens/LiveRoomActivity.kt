@@ -41,6 +41,8 @@ class LiveRoomActivity : AppCompatActivity() {
     private lateinit var btnSend: Button
 
     private val chatAdapter = ChatAdapter()
+    // 同接人数
+    private lateinit var tvOnlineCount: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +54,7 @@ class LiveRoomActivity : AppCompatActivity() {
         observeViewModel()
         viewModel.fetchHostInfo("5")
         viewModel.fetchComments()
+        viewModel.startWebSocket()
     }
 
     private fun initializeViews() {
@@ -65,6 +68,8 @@ class LiveRoomActivity : AppCompatActivity() {
         rvCommentList = findViewById(R.id.rv_chat_list)
         etComment = findViewById(R.id.et_comment)
         btnSend = findViewById(R.id.btn_send)
+        // 同接人数
+        tvOnlineCount = findViewById(R.id.tv_online_count)
     }
     private fun setupRecyclerView(){
         rvCommentList.apply {
@@ -105,6 +110,9 @@ class LiveRoomActivity : AppCompatActivity() {
             if (success) {
                 etComment.text.clear()
             }
+        }
+        viewModel.onlineCount.observe(this){count->
+            tvOnlineCount.text = "$count"
         }
         viewModel.errorMsg.observe(this) { msg ->
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
