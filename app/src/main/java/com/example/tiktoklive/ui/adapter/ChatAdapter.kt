@@ -17,7 +17,7 @@ import com.example.tiktoklive.data.model.Comment
 
 class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
-    private val messages = ArrayList<Comment>()
+    private val messages: MutableList<Comment> = ArrayList()
 
     fun setMessages(newMessages: List<Comment>) {
         messages.clear()
@@ -25,10 +25,10 @@ class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
         notifyDataSetChanged()
     }
 
-    fun addMessage(message: Comment) {
-        messages.add(message)
-        notifyItemInserted(messages.size - 1)
-    }
+//    fun addMessage(message: Comment) {
+//        messages.add(message)
+//        notifyItemInserted(messages.size - 1)
+//    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val view = LayoutInflater.from(parent.context)

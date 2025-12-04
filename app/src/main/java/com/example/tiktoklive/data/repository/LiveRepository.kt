@@ -1,36 +1,43 @@
 package com.example.tiktoklive.data.repository
 
-import android.util.Log
 import com.example.tiktoklive.data.model.Comment
 import com.example.tiktoklive.data.model.Host
 import com.example.tiktoklive.data.service.LiveApiService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LiveRepository {
+class LiveRepository @Inject constructor(
+    private val apiService: LiveApiService
+) {
     suspend fun getHostInfo(hostId: String): Host {
-        return LiveApiService.api.getHostInfo(hostId)
+        return apiService.getHostInfo(hostId)
     }
 
     suspend fun getComments(): List<Comment> {
-        return LiveApiService.api.getComments()
+        return apiService.getComments()
     }
 
     suspend fun sendComment(content: String): Comment {
-        return LiveApiService.api.sendComment(content)
+        return apiService.sendComment(content)
     }
 
     //WebSocket
 
     private var webSocket: WebSocket? = null
     private val client = OkHttpClient()
+
+    private var heartbeatJob: Job? = null
+    private val repositoryScope = CoroutineScope(Dispatchers.IO)
 
     // 定义一个简单的回调接口，用于将 WebSocket 消息传回 ViewModel
     interface WebSocketCallback {
@@ -48,11 +55,10 @@ class LiveRepository {
             override fun onOpen(ws: WebSocket, response: Response) {
                 callback.onConnected()
 
-                // 模拟心跳/流量逻辑 (注意：GlobalScope仅用于演示，实际建议传入 CoroutineScope)
-                GlobalScope.launch(Dispatchers.IO) {
-                    while (webSocket != null) {
+                heartbeatJob = repositoryScope.launch {
+                    while (true) {
                         delay(2000)
-                        ws.send("heartbeat")
+                        webSocket?.send("heartbeat") ?: break
                     }
                 }
             }

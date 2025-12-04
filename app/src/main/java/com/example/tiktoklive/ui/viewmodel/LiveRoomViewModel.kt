@@ -8,15 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.tiktoklive.data.model.Comment
 import com.example.tiktoklive.data.model.Host
 import com.example.tiktoklive.data.repository.LiveRepository
-import com.example.tiktoklive.data.service.LiveApiService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.WebSocket
-import okhttp3.WebSocketListener
+import javax.inject.Inject
 
-class LiveRoomViewModel : ViewModel() {
-    private val repository = LiveRepository()
+@HiltViewModel
+class LiveRoomViewModel @Inject constructor(
+    private val repository: LiveRepository
+) : ViewModel() {
+    private val TAG = "LiveRoomVM"
 
     // 主播信息
     private val _hostInfo = MutableLiveData<Host>()
@@ -44,7 +46,7 @@ class LiveRoomViewModel : ViewModel() {
                 val host = repository.getHostInfo(hostId)
                 _hostInfo.value = host
             } catch (e: Exception) {
-                Log.e("LiveRoomVM", "Error fetching host info", e)
+                Log.e(TAG, "Error fetching host info", e)
                 _errorMsg.value = "加载失败: ${e.message}\n${e.cause}"
             }
         }
@@ -56,7 +58,7 @@ class LiveRoomViewModel : ViewModel() {
                 val list = repository.getComments()
                 _comments.value = list
             } catch (e: Exception) {
-                Log.e("LiveRoomVM", "Get comments failed: ${e.message}")
+                Log.e(TAG, "Get comments failed: ${e.message}")
             }
         }
     }
@@ -79,7 +81,7 @@ class LiveRoomViewModel : ViewModel() {
     fun startWebSocket() {
         repository.startWebSocket(object : LiveRepository.WebSocketCallback{
             override fun onConnected() {
-                Log.d("LiveRoomVM","连接成功")
+                Log.d(TAG,"连接成功")
             }
 
             override fun onMessageReceived(text: String) {
@@ -88,7 +90,7 @@ class LiveRoomViewModel : ViewModel() {
             }
 
             override fun onFailure(t: Throwable) {
-                Log.e("LiveRoomVM","失败",t)
+                Log.e(TAG,"失败",t)
             }
         })
     }

@@ -21,12 +21,13 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.tiktoklive.R
 import com.example.tiktoklive.ui.adapter.ChatAdapter
 import com.example.tiktoklive.ui.viewmodel.LiveRoomViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+private const val URL = "https://livesim2.dashif.org/livesim2/chunkdur_1/ato_7/testpic4_8s/Manifest300.mpd"
+@AndroidEntryPoint
 class LiveRoomActivity : AppCompatActivity() {
     private var player: ExoPlayer? = null
     private var playerView: PlayerView? = null
-
-    private val URL = "https://livesim2.dashif.org/livesim2/chunkdur_1/ato_7/testpic4_8s/Manifest300.mpd"
 
     // 注入ViewModel
     private val viewModel: LiveRoomViewModel by viewModels()
