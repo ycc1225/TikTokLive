@@ -2,23 +2,117 @@ package com.example.tiktoklive.ui.screens
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.tiktoklive.R
+import com.example.tiktoklive.data.model.Comment
+import com.example.tiktoklive.ui.adapter.ChatAdapter
+import com.example.tiktoklive.ui.viewmodel.LiveRoomViewModel
+import com.google.android.material.internal.ViewUtils.hideKeyboard
 
 class LiveRoomActivity : AppCompatActivity() {
     private var player: ExoPlayer? = null
     private var playerView: PlayerView? = null
 
     private val URL = "https://livesim2.dashif.org/livesim2/chunkdur_1/ato_7/testpic4_8s/Manifest300.mpd"
+
+    // 注入ViewModel
+    private val viewModel: LiveRoomViewModel by viewModels()
+
+    // 主播信息
+    private lateinit var ivAvatar: ImageView
+    private lateinit var tvName: TextView
+    private lateinit var tvFollowers: TextView
+    // 评论相关
+    private lateinit var rvCommentList: RecyclerView
+    private lateinit var etComment: EditText
+    private lateinit var btnSend: Button
+
+    private val chatAdapter = ChatAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_live_room)
+        // 初始化view
+        initializeViews()
+        setupRecyclerView()
+        setupListener()
+        observeViewModel()
+        viewModel.fetchHostInfo("5")
+        viewModel.fetchComments()
+    }
+
+    private fun initializeViews() {
+        // 播放器
         playerView = findViewById(R.id.player_view)
+        // 用户信息
+        ivAvatar = findViewById(R.id.iv_host_avatar)
+        tvName = findViewById(R.id.tv_host_name)
+        tvFollowers = findViewById(R.id.tv_follower_count)
+        // 评论相关
+        rvCommentList = findViewById(R.id.rv_chat_list)
+        etComment = findViewById(R.id.et_comment)
+        btnSend = findViewById(R.id.btn_send)
+    }
+    private fun setupRecyclerView(){
+        rvCommentList.apply {
+            layoutManager = LinearLayoutManager(this@LiveRoomActivity)
+            adapter = chatAdapter
+        }
+    }
+    private fun setupListener(){
+        btnSend.setOnClickListener {
+            val content = etComment.text.toString().trim()
+            if (content.isNotEmpty()){
+                viewModel.sendComment(content)
+            }else{
+                Toast.makeText(this,"内容不能为空", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.hostInfo.observe(this) { host ->
+            tvName.text = host.name
+            tvFollowers.text = "${host.followerCount} 关注"
+            Glide.with(this)
+                .load(host.avatarUrl)
+                .transform(CircleCrop()) // 圆形裁剪
+                .placeholder(R.color.uiBackground)
+                .into(ivAvatar)
+
+            Log.d("LiveRoom", "Host loaded: ${host.name}")
+        }
+        viewModel.comments.observe(this) {comments ->
+            chatAdapter.setMessages(comments)
+            if (comments.isNotEmpty()){
+                rvCommentList.scrollToPosition(comments.size - 1)
+            }
+        }
+        viewModel.sendSuccess.observe(this){success->
+            if (success) {
+                etComment.text.clear()
+            }
+        }
+        viewModel.errorMsg.observe(this) { msg ->
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onStart() {
@@ -60,15 +154,8 @@ class LiveRoomActivity : AppCompatActivity() {
                 prepare()
                 addListener(
                     object : Player.Listener{
-                        override fun onPlaybackStateChanged(playbackState: Int) {
-                            when(playbackState){
-                                Player.STATE_BUFFERING -> {Log.d("LiveRoom","缓存")}
-                                Player.STATE_READY -> {Log.d("LiveRoom","就绪")}
-                                Player.STATE_ENDED -> {Log.d("LiveRoom","结束")}
-                            }
-                        }
-
                         override fun onPlayerError(error: PlaybackException) {
+                            Toast.makeText(applicationContext,"播放错误:${error.message}", Toast.LENGTH_SHORT).show()
                             Log.e("LiveRoom","错误${error.message},${error.cause}")
                         }
                     }
