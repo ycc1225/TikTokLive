@@ -5,7 +5,6 @@ import com.example.tiktoklive.data.model.Host
 import com.example.tiktoklive.data.service.LiveApiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

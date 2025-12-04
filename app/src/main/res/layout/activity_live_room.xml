@@ -8,7 +8,6 @@
     android:keepScreenOn="true"
     tools:context=".ui.screens.LiveRoomActivity">
 
-    <!--底层播放器-->
     <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="0dp"
@@ -21,123 +20,9 @@
         app:use_controller="false"
         app:surface_type="surface_view" />
 
-    <!--上层UI-->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/ui_layer"
+    <FrameLayout
+        android:id="@+id/fl_interaction_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="40dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp">
-
-        <!--主播信息卡片-->
-        <LinearLayout
-            android:id="@+id/ll_host_card"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_host_card"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="4dp"
-            android:paddingEnd="12dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!--主播头像-->
-            <ImageView
-                android:id="@+id/iv_host_avatar"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:scaleType="centerCrop"/>
-
-            <!--主播文本信息-->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tv_host_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Loading..."
-                    android:textColor="@android:color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:maxWidth="100dp"/>
-
-                <TextView
-                    android:id="@+id/tv_follower_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 关注"
-                    android:textColor="#DDDDDD"
-                    android:textSize="10sp"/>
-            </LinearLayout>
-        </LinearLayout>
-        <!--聊天信息-->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_chat_list"
-            android:layout_width="280dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="8dp"
-            android:fadeScrollbars="true"
-            app:layout_constraintBottom_toTopOf="@+id/ll_input_bar"
-            app:layout_constraintHeight_percent="0.35"
-            app:layout_constraintStart_toStartOf="parent" />
-        <!--发送区-->
-        <LinearLayout
-            android:id="@+id/ll_input_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-            android:background="@android:color/transparent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <EditText
-                android:id="@+id/et_comment"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/bg_host_card"
-                android:hint="点击编辑评论"
-                android:textColorHint="#CCCCCC"
-                android:textColor="@android:color/white"
-                android:padding="10dp"
-                android:textSize="14sp"
-                android:maxLines="1"
-                android:inputType="text"/>
-
-            <Button
-                android:id="@+id/btn_send"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="发送"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#FF4081"/>
-        </LinearLayout>
-        <!--同接人数-->
-        <TextView
-            android:id="@+id/tv_online_count"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/bg_host_card"
-            android:gravity="center"
-            android:paddingHorizontal="12dp"
-            android:text="0"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="match_parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
