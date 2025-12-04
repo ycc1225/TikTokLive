@@ -35,7 +35,7 @@ class UserInfoComponent : ILiveComponent {
         }
 
         viewModel.onlineCount.observe(lifecycleOwner) { count ->
-            tvOnlineCount?.text = "$count"
+            tvOnlineCount?.text = "$count 人在线"
         }
     }
 

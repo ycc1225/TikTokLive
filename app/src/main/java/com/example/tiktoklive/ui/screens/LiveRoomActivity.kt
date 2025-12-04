@@ -16,6 +16,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.example.tiktoklive.R
+import com.example.tiktoklive.manager.LivePlayerManager
 import com.example.tiktoklive.ui.component.LiveComponentManager
 import com.example.tiktoklive.ui.component.impl.ChatComponent
 import com.example.tiktoklive.ui.component.impl.InputComponent
@@ -84,31 +85,57 @@ class LiveRoomActivity : AppCompatActivity() {
     }
 
     private fun initializePlayer(){
-        player = ExoPlayer.Builder(this)
-            .build()
-            .apply {
-                playerView?.player = this
-                val mediaItem = MediaItem.fromUri(URL)
-                setMediaItem(mediaItem)
-                prepare()
-                addListener(
-                    object : Player.Listener{
-                        override fun onRenderedFirstFrame() {
-                            val videoTime = System.currentTimeMillis()
-                            val duration = videoTime - startTime
-                            Log.d("PerformanceTest", "T2 - Video First Frame Rendered: $videoTime")
-                            Log.d("PerformanceTest", "Cost(Activity Start -> Video): ${duration}ms")
-                            if (!isUILoaded){
-                                loadInteractionLayerAsync()
-                            }
-                        }
-                        override fun onPlayerError(error: PlaybackException) {
-                            Toast.makeText(applicationContext,"播放错误:${error.message}", Toast.LENGTH_SHORT).show()
-                            Log.e(TAG,"错误${error.message},${error.cause}")
-                        }
-                    }
-                )
+        Log.d("PerformanceTest", "initializePlayer: Start")
+        player = LivePlayerManager.getPlayer(this)
+        player?.clearVideoSurface()
+        playerView?.player = player
+        player?.addListener(object : Player.Listener{
+            override fun onRenderedFirstFrame() {
+                Log.d("PerformanceTest", "Callback: onRenderedFirstFrame")
+                tryLoadUI()
             }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    tryLoadUI()
+                }
+            }
+            override fun onPlayerError(error: PlaybackException) {
+                Toast.makeText(applicationContext,"播放错误:${error.message}", Toast.LENGTH_SHORT).show()
+                Log.e(TAG,"错误${error.message},${error.cause}")
+            }
+        })
+
+        val hasItem = player?.currentMediaItem != null
+        val isError = player?.playbackState == Player.STATE_IDLE
+
+        if (!hasItem || isError) {
+            Log.w("PerformanceTest", "Player is empty or idle, reloading media...")
+            val mediaItem = MediaItem.fromUri(URL)
+            player?.setMediaItem(mediaItem)
+            player?.prepare()
+        }
+
+        if (player?.playbackState == Player.STATE_READY && player?.videoFormat != null) {
+            Log.d("PerformanceTest", "Player is already READY, force load UI")
+            tryLoadUI()
+        }
+
+        // 刷新到当前时间，消除预加载和实际时间的延迟
+        if (player?.isCurrentMediaItemLive == true){
+            player?.seekToDefaultPosition()
+        }
+        player?.playWhenReady = true
+    }
+
+    private fun tryLoadUI(){
+        if (!isUILoaded){
+            val videoTime = System.currentTimeMillis()
+            val duration = videoTime - startTime
+            Log.d("PerformanceTest", "T2 - Video First Frame Rendered: $videoTime")
+            Log.d("PerformanceTest", "Cost(Activity Start -> Video): ${duration}ms")
+            loadInteractionLayerAsync()
+        }
     }
 
     private fun loadInteractionLayerAsync(){
@@ -137,8 +164,10 @@ class LiveRoomActivity : AppCompatActivity() {
         Log.d(TAG,"交互层加载完毕")
     }
 
-    private fun releasePlayer(){
-        player?.release()
+    private fun releasePlayer() {
+        playerView?.player = null
+        player?.clearVideoSurface()
+        LivePlayerManager.pause()
         player = null
     }
 }
