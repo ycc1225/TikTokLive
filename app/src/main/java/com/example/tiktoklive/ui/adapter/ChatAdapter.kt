@@ -1,6 +1,5 @@
 package com.example.tiktoklive.ui.adapter
 
-import android.graphics.Color
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -11,7 +10,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tiktoklive.R
 import com.example.tiktoklive.data.model.Comment
-import androidx.core.graphics.toColorInt
 
 class ChatAdapter : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 

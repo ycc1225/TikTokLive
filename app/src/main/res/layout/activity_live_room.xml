@@ -79,7 +79,7 @@
                     android:textSize="10sp"/>
             </LinearLayout>
         </LinearLayout>
-
+        <!--聊天信息-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_chat_list"
             android:layout_width="280dp"
@@ -90,7 +90,7 @@
             app:layout_constraintBottom_toTopOf="@+id/ll_input_bar"
             app:layout_constraintHeight_percent="0.35"
             app:layout_constraintStart_toStartOf="parent" />
-
+        <!--发送按钮-->
         <LinearLayout
             android:id="@+id/ll_input_bar"
             android:layout_width="match_parent"
@@ -123,6 +123,21 @@
                 android:textColor="@android:color/white"
                 android:backgroundTint="#FF4081"/>
         </LinearLayout>
+        <!--同接人数-->
+        <TextView
+            android:id="@+id/tv_online_count"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_host_card"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:text="0"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
