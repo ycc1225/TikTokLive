@@ -77,7 +77,7 @@
         android:layout_marginBottom="8dp"
         android:fadeScrollbars="true"
         app:layout_constraintBottom_toTopOf="@+id/ll_input_bar"
-        app:layout_constraintHeight_percent="0.25"
+        app:layout_constraintHeight_percent="0.35"
         app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
