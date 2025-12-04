@@ -6,7 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
-    tools:context=".ui.screens.LiveRoomActivity">
+    tools:context=".ui.screens.LiveRoomActivity"
+    android:background="@color/black"
+    >
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
